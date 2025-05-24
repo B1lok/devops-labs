@@ -2,11 +2,11 @@
 kind: Ingress
 metadata:
   name: app-ingress
-  namespace: default
+  namespace: dev
   annotations:
     nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
-  ingressClassName: nginx
+  ingressClassName: nginx-dev
   rules:
     - http:
         paths:

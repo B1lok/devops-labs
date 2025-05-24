@@ -1,20 +1,20 @@
-﻿name: Build & Deploy Map Client
+﻿name: Build & Deploy CommunicationControl
 
 on:
   push:
     branches: [ main, dev ]
   workflow_dispatch:
-    
-env:
-  IMAGE_BASE: gcr.io/${{ secrets.PROJECT_ID }}/map-client
 
-jobs: 
+env:
+  IMAGE_BASE: gcr.io/${{ secrets.PROJECT_ID }}/communication-control
+
+jobs:
   build:
     runs-on: ubuntu-latest
-    defaults: 
-      run: 
-        working-directory: src/MapClient
-        
+    defaults:
+      run:
+        working-directory: src/CommunicationControl
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -43,7 +43,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ${{ env.IMAGE_BASE }}:${BRANCH_NAME}-${SHORT_SHA} .
+          docker build -f Dockerfile -t ${{ env.IMAGE_BASE }}:${BRANCH_NAME}-${SHORT_SHA} .
 
       - name: Push Docker image
         run: |
@@ -52,16 +52,7 @@ jobs:
         run: |
           gcloud container clusters get-credentials ${{ secrets.CLUSTER_NAME }} --zone us-central1-c --project ${{ secrets.PROJECT_ID }}
 
-      - name: Set image in map-client deployment
+      - name: Set image in communication-control deployment
         run: |
           kubectl config set-context --current --namespace=${BRANCH_NAME}
-          kubectl set image deployment/map-client map-client=${{ env.IMAGE_BASE }}:${BRANCH_NAME}-${SHORT_SHA}
-      - name: Set VITE_API_BASE_URL env var
-        run: |
-          if [[ "${BRANCH_NAME}" == "main" ]]; then
-            LB_IP=${{ secrets.LB_IP_MAIN }}
-          else
-            LB_IP=${{ secrets.LB_IP_DEV }}
-          fi
-
-          kubectl set env deployment/map-client VITE_API_BASE_URL=http://$LB_IP/communication/api/v1/client -n $BRANCH_NAME
+          kubectl set image deployment/communication-control communication-control=${{ env.IMAGE_BASE }}:${BRANCH_NAME}-${SHORT_SHA}
