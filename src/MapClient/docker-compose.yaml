@@ -1,0 +1,43 @@
+name: lab4
+
+services:
+  redis:
+    image: redis
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - devops-network
+  communication-control:
+    image: gcr.io/angelic-tracer-455316-q7/communication-api:latest
+    container_name: communication-api
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+    networks:
+      - devops-network
+  hivemind-api:
+    image: gcr.io/angelic-tracer-455316-q7/hivemind-api:latest
+    container_name: hivemind-api
+    ports:
+      - "5149:5149"
+    depends_on:
+      - communication-control
+    networks:
+      - devops-network
+  map-client:
+    image: gcr.io/angelic-tracer-455316-q7/map-client:latest
+    container_name: map-client
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - communication-control
+    networks:
+      - devops-network
+
+networks:
+  devops-network:
+    driver: bridge

@@ -1,0 +1,10 @@
+﻿apiVersion: v1
+kind: Service
+metadata:
+  name: communication-control
+spec:
+  selector:
+    app: communication-control
+  ports:
+      - port: 80
+        targetPort: 8080  

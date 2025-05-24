@@ -1,0 +1,28 @@
+﻿apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: communication-control
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: communication-control
+  template:
+    metadata:
+      labels:
+        app: communication-control
+    spec:
+      containers:
+        - name: communication-control
+          image: gcr.io/angelic-tracer-455316-q7/communication-api:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: Redis__ConnectionString
+              value: redis:6379
+            - name: BasePath
+              value: /communication
+      restartPolicy: Always
+      

@@ -1,0 +1,27 @@
+﻿apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: map-client
+  labels:
+    app: map-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: map-client
+  template:
+    metadata:
+      labels:
+        app: map-client
+    spec:
+      containers:
+        - name: map-client
+          image: gcr.io/angelic-tracer-455316-q7/map-client:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          env:
+            - name: VITE_API_BASE_URL
+              value: http://34.9.246.237/communication/api/v1/client
+      restartPolicy: Always
+      
