@@ -40,3 +40,20 @@ jobs:
       - name: Push Docker image
         run: |
           docker push ${{ env.IMAGE_BASE }}:${BRANCH_NAME}-${SHORT_SHA}
+      - name: Get GKE credentials
+        run: |
+          gcloud container clusters get-credentials ${{ secrets.CLUSTER_NAME }} --zone us-central1-c --project angelic-tracer-455316-q7
+
+      - name: Set image in map-client deployment
+        run: |
+          kubectl config set-context --current --namespace=${BRANCH_NAME}
+          kubectl set image deployment/map-client map-client=${{ env.IMAGE_BASE }}:${BRANCH_NAME}-${SHORT_SHA}
+      - name: Set VITE_API_BASE_URL env var
+        run: |
+          if [[ "${BRANCH_NAME}" == "main" ]]; then
+            LB_IP=${{ secrets.LB_IP_MAIN }}
+          else
+            LB_IP=${{ secrets.LB_IP_DEV }}
+          fi
+
+          kubectl set env deployment/map-client VITE_API_BASE_URL=http://$LB_IP/communication/api/v1/client -n $BRANCH_NAME
